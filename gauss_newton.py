@@ -5,7 +5,7 @@ import func_gn
 from grad import grad_c, jacobian_c
 
 
-tol = 1.e-4
+tol = 1e-10
 plotout = True
 printout = True
 
@@ -17,16 +17,18 @@ def armijo(f, x, d):
     alpha = 2
     lamd = 1
     eval = 3
-    
-    F = lambda lam: f(x + d*lam)
-    F_prim0 = np.dot(grad_c(f,x),d)
-    F_0 = F(0)
 
-    while F(alpha*lamd) < F_0 + eps * F_prim0*alpha*lamd:
-        lamd = alpha * lamd
+    F_prim0 = np.dot(grad_c(f,x),d)
+    F_0 = f(x)
+
+    
+
+    while f(x + alpha * lamd * d) < F_0 + eps * (alpha * lamd) * F_prim0:
+        lamd *= alpha
         eval += 1
-    while F(lamd) > F_0 + eps * F_prim0 * lamd:
-        lamd = lamd / alpha
+
+    while f(x + lamd * d) > F_0 + eps * lamd * F_prim0:
+        lamd /= alpha
         eval += 1
 
     return eval, x + d * lamd, lamd
@@ -51,9 +53,12 @@ def gauss_newton(phi : Callable[[np.ndarray, np.ndarray], np.ndarray],
 
     if printout:
             print("iter     x              max(abs(r))   norm(grad)   ls   fun evals   lamb")
+    
+    print("Initial gradient:", np.linalg.norm(grad_c(f, x0)))
 
     for k in range(max_iter):
         N_iter += 1
+
         grad_fk = grad_c(f,x)
         normg = np.linalg.norm(grad_fk)
         if normg < tol:
@@ -66,20 +71,17 @@ def gauss_newton(phi : Callable[[np.ndarray, np.ndarray], np.ndarray],
         res = r(x)
         J_res = np.matmul(J_t, res)
 
-        d_k = np.linalg.solve(J_2, -J_res)
+        try:
+            d_k = np.linalg.solve(J_2, -J_res)
+        except np.linalg.LinAlgError:
+            d_k = np.linalg.lstsq(J_2, -J_res, rcond=None)[0]
+
 
         evals, x, lamd = armijo(f,x,d_k)
         N_eval += evals
 
-        """if printout:
-            max_abs_r = float(np.max(np.abs(res)))
-            # första raden
-            print(
-                f"{k:3d}   {x[0]:.4f}        {max_abs_r:10.4f}   {normg:10.4f}   "
-                f"{evals:2d}   {N_eval:4d}        {lamd:6.4f}"
-            )
-            for j in range(1, len(x)):
-                print(f"      {x[j]:.4f}")"""
+        if printout:
+            print(f"{k:3d}   {np.max(np.abs(r(x))):10.4e}   {normg:10.4e}   {evals:3d}   {N_eval:4d}   {lamd:7.4f}")
 
 
     if plotout:
@@ -87,9 +89,14 @@ def gauss_newton(phi : Callable[[np.ndarray, np.ndarray], np.ndarray],
 
     return x, N_eval, k, normg
 
+
+
+# X är 2dimensionell för phi1? och 4-dim för phi2?
+
 x0 = np.array([1,2,3,4])
 result = gauss_newton(func_gn.phi1, t, y, x0, tol, printout, plotout)
 
+print(f'\n')
 print(result)
 
 

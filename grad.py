@@ -6,7 +6,7 @@ import numpy as np
 
 def grad_c(f : Callable[[np.ndarray], float], \
             x : np.ndarray, \
-            h : float = 1.e-8) -> np.ndarray:
+            h : float = 1e-8) -> np.ndarray:
     """
     Calculates the gradient (numpy-1D-array) g of 
     function f with central differences
