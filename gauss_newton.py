@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from grad import grad_c, jacobian_c
 
 
-tol = 1e-6
+tol = 1e-4
 plotout = True
 printout = True
 
@@ -69,15 +69,14 @@ def gauss_newton(phi : Callable[[np.ndarray, np.ndarray], np.ndarray],
         x = x + d_k * lamd
         N_iter += 1
 
-        """if printout:
+        if printout:
             max_abs_r = float(np.max(np.abs(res)))
             # första raden
             print(
                 f"{k:3d}   {x[0]:.4f}        {max_abs_r:10.4f}   {normg:10.4f}   "
                 f"{evals:2d}   {N_eval:4d}        {lamd:6.4f}"
             )
-            for j in range(1, len(x)):
-                print(f"      {x[j]:.4f}")"""
+ 
 
 
     if plotout:
@@ -101,9 +100,8 @@ def gauss_newton(phi : Callable[[np.ndarray, np.ndarray], np.ndarray],
     return x, N_eval, N_iter, normg
 
 x0 = np.array([1,2,3,4])
-x, N_eval, N_iter, normg = gauss_newton(func_gn.phi2, t, y, x0, tol, printout, plotout)
+gauss_newton(func_gn.phi1, t, y, x0, tol, printout, plotout)
 
-print(x)
 
 
 
