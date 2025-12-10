@@ -10,8 +10,8 @@ tol = 1e-4
 plotout = True
 printout = True
 
-t, y = func_gn.get_data_json("data1.json")
-#t, y = func_gn.get_data_json("data2.json")
+
+t, y = func_gn.get_data_json("data2.json")
 
 def armijo(f, x, d, grad):
     eps = 0.2
@@ -52,7 +52,7 @@ def gauss_newton(phi : Callable[[np.ndarray, np.ndarray], np.ndarray],
 
     if printout:
             print("iter     x              max(abs(r))   norm(grad)   ls   fun evals   lamb")
-
+ 
     for k in range(max_iter):
         grad_fk = grad_c(f,x)
         normg = np.linalg.norm(grad_fk)
@@ -73,9 +73,11 @@ def gauss_newton(phi : Callable[[np.ndarray, np.ndarray], np.ndarray],
             max_abs_r = float(np.max(np.abs(res)))
             # första raden
             print(
-                f"{k:3d}   {x[0]:.4f}        {max_abs_r:10.4f}   {normg:10.4f}   "
+                f"{N_iter:3d}   {x[0]:.4f}        {max_abs_r:10.4f}   {normg:10.4f}   "
                 f"{evals:2d}   {N_eval:4d}        {lamd:6.4f}"
             )
+            for j in range(1, len(x)):
+                print(f"   {x[j]:10.4f}")
  
 
 
@@ -100,7 +102,7 @@ def gauss_newton(phi : Callable[[np.ndarray, np.ndarray], np.ndarray],
     return x, N_eval, N_iter, normg
 
 x0 = np.array([1,2,3,4])
-gauss_newton(func_gn.phi1, t, y, x0, tol, printout, plotout)
+gauss_newton(func_gn.phi2, t, y, x0, tol, printout, plotout)
 
 
 
